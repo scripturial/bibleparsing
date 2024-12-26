@@ -1,4 +1,4 @@
-const Parsing = packed struct(u32) {
+pub const Parsing = packed struct(u32) {
     part_of_speech: PartOfSpeech = .unknown,
     tense_form: TenseForm = .unknown,
     mood: Mood = .unknown,
@@ -17,7 +17,7 @@ const Parsing = packed struct(u32) {
     crasis: bool = false,
 };
 
-const PartOfSpeech = enum(u5) {
+pub const PartOfSpeech = enum(u5) {
     unknown = 0,
     particle = 1,
     verb = 2,
@@ -50,7 +50,7 @@ const PartOfSpeech = enum(u5) {
     comparative_noun = 29,
 };
 
-const TenseForm = enum(u4) {
+pub const TenseForm = enum(u4) {
     unknown = 0,
     present = 1,
     future = 2,
@@ -64,7 +64,7 @@ const TenseForm = enum(u4) {
     second_pluperfect = 10,
 };
 
-const Voice = enum(u3) {
+pub const Voice = enum(u3) {
     unknown = 0,
     active = 1,
     middle = 2,
@@ -75,7 +75,7 @@ const Voice = enum(u3) {
     middle_or_passive_deponent = 7,
 };
 
-const Mood = enum(u3) {
+pub const Mood = enum(u3) {
     unknown = 0,
     indicative = 1,
     subjunctive = 2,
@@ -85,7 +85,7 @@ const Mood = enum(u3) {
     participle = 6,
 };
 
-const Gender = enum(u3) {
+pub const Gender = enum(u3) {
     unknown = 0,
     masculine = 1,
     feminine = 2,
@@ -93,21 +93,21 @@ const Gender = enum(u3) {
     masculine_feminine = 4,
 };
 
-const Person = enum(u2) {
+pub const Person = enum(u2) {
     unknown = 0,
     first = 1,
     second = 2,
     third = 3,
 };
 
-const Number = enum(u2) {
+pub const Number = enum(u2) {
     unknown = 0,
     singular = 1,
     dual = 2,
     plural = 3,
 };
 
-const Case = enum(u3) {
+pub const Case = enum(u3) {
     unknown = 0,
     nominative = 1,
     accusative = 2,
