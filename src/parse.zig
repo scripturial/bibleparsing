@@ -98,29 +98,39 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
         }
     }
 
-    // TODO multi letter pos
-
-    return error.InvalidParsing;
-}
-
-pub fn parse_a(t: *Tokenizer) !Parsing {
-    t.skip();
-    const c = t.next();
-    switch (c) {
-        '-' => {
-            parse_cng(t);
-        },
-        'D', 'd' => {
-            if (c == 'v' or c == 'v') {
-                parse_adv_type(t);
-            } else {
-                return error.InvalidParsing;
-            }
-        },
-        else => {
-            return error.InvalidParsing;
-        },
+    // Three letter pos
+    const d = t.next();
+    const e = t.next();
+    if ((c == 'A' or c == 'a') and (d == 'D' or d == 'd') and (e == 'V' or e == 'v')) {
+        t.parsing.part_of_speech = .adverb;
+        try parse_flag(t);
+        return t.parsing;
     }
+    if ((c == 'P' or c == 'p') and (d == 'R' or d == 'r') and (e == 'T' or e == 't')) {
+        t.parsing.part_of_speech = .particle;
+        try parse_flag(t);
+        return t.parsing;
+    }
+    if ((c == 'I' or c == 'i') and (d == 'N' or d == 'n') and (e == 'J' or e == 'j')) {
+        t.parsing.part_of_speech = .interjection;
+        try parse_flag(t);
+        return t.parsing;
+    }
+    // Four letter pos
+    const f = t.next();
+    if ((c == 'C' or c == 'c') and (d == 'O' or d == 'o') and (e == 'N' or c == 'n')) {
+        if (f == 'D' or f == 'd') {
+            t.parsing.part_of_speech = .conditional;
+            try parse_flag(t);
+            return t.parsing;
+        }
+        if (f == 'J' or f == 'j') {
+            t.parsing.part_of_speech = .conjunction;
+            try parse_flag(t);
+            return t.parsing;
+        }
+    }
+
     return error.InvalidParsing;
 }
 
@@ -184,6 +194,18 @@ pub fn parse_vp(t: *Tokenizer) !void {
         },
         'P', 'p' => {
             t.parsing.voice = .passive;
+        },
+        'E', 'e' => {
+            t.parsing.voice = .middle_or_passive;
+        },
+        'D', 'd' => {
+            t.parsing.voice = .middle_deponent;
+        },
+        'O', 'o' => {
+            t.parsing.voice = .passive_deponent;
+        },
+        'N', 'n' => {
+            t.parsing.voice = .middle_or_passive_deponent;
         },
         0 => {
             return error.Incomplete;
@@ -349,34 +371,50 @@ pub fn parse_cng(t: *Tokenizer) !void {
     }
 }
 
-pub fn parse_adv_type(t: *Tokenizer) !Parsing {
-    // case
-    switch (t.next()) {
-        'I', 'i' => {
-            t.parsing.interrogative = true;
-        },
-        'K', 'k' => {
-            t.parsing.correlative = true;
-        },
-        'N', 'n' => {
-            t.parsing.negative = true;
-        },
-        'C', 'c' => {
-            t.parsing.comparative = true;
-        },
-        'S', 's' => {
-            t.parsing.superlative = true;
-        },
-        0 => {
-            return error.Incomplete;
-        },
-        else => {
-            return error.InvalidParsing;
-        },
+inline fn parse_flag(t: *Tokenizer) !void {
+    if (t.peek() == '-') {
+        _ = t.next();
+        switch (t.next()) {
+            'I', 'i' => {
+                t.parsing.interrogative = true;
+            },
+            'K', 'k' => {
+                if (t.parsing.part_of_speech == .adverb) {
+                    t.parsing.correlative = true;
+                } else {
+                    t.parsing.crasis = true;
+                }
+            },
+            'N', 'n' => {
+                t.parsing.negative = true;
+            },
+            'C', 'c' => {
+                switch (t.parsing.part_of_speech) {
+                    .adverb => t.parsing.part_of_speech = .comparative_adverb,
+                    .adjective => t.parsing.part_of_speech = .comparative_adjective,
+                    .noun => t.parsing.part_of_speech = .comparative_noun,
+                    else => return error.InvalidParsing,
+                }
+            },
+            'S', 's' => {
+                switch (t.parsing.part_of_speech) {
+                    .adverb => t.parsing.part_of_speech = .superlative_adverb,
+                    .adjective => t.parsing.part_of_speech = .superlative_adjective,
+                    .noun => t.parsing.part_of_speech = .superlative_noun,
+                    else => return error.InvalidParsing,
+                }
+            },
+            0 => {
+                return error.Incomplete;
+            },
+            else => {
+                return error.InvalidParsing;
+            },
+        }
     }
 
-    if (is_breaking(t.next())) {
-        return t.parsing;
+    if (!is_breaking(t.next())) {
+        return error.InvalidParsing;
     }
 }
 
@@ -462,6 +500,20 @@ test "simple parsing tests" {
         .person = .second,
         .number = .plural,
     }, try parse("V-PAI-2P"));
+    try expectEqual(Parsing{
+        .part_of_speech = .conjunction,
+        .negative = true,
+    }, try parse("CONJ-N"));
+    try expectEqual(Parsing{
+        .part_of_speech = .conditional,
+        .crasis = true,
+    }, try parse("COND-K"));
+    try expectEqual(Parsing{
+        .part_of_speech = .superlative_adverb,
+    }, try parse("ADV-S"));
+    try expectEqual(Parsing{
+        .part_of_speech = .comparative_adverb,
+    }, try parse("ADV-C"));
 
     try expectError(error.InvalidParsing, parse("M-GSF"));
     try expectError(error.Incomplete, parse("A-GS"));
