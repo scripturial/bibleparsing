@@ -20,72 +20,72 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
     if (p == '-' or p == 0) {
         _ = t.next();
         switch (c) {
-            'V' | 'v' => {
+            'V', 'v' => {
                 t.parsing.part_of_speech = .verb;
                 try parse_vp(t);
                 return t.parsing;
             },
-            'N' | 'n' => {
+            'N', 'n' => {
                 t.parsing.part_of_speech = .noun;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'A' | 'a' => {
+            'A', 'a' => {
                 t.parsing.part_of_speech = .adjective;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'R' | 'r' => {
+            'R', 'r' => {
                 t.parsing.part_of_speech = .relative_pronoun;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'C' | 'c' => {
+            'C', 'c' => {
                 t.parsing.part_of_speech = .relative_pronoun;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'D' | 'd' => {
+            'D', 'd' => {
                 t.parsing.part_of_speech = .demonstrative_pronoun;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'T' | 't' => {
+            'T', 't' => {
                 t.parsing.part_of_speech = .article;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'O' | 'o' => {
+            'O', 'o' => {
                 t.parsing.part_of_speech = .pronoun;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'K' | 'k' => {
+            'K', 'k' => {
                 t.parsing.part_of_speech = .pronoun;
                 t.parsing.correlative = true;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'I' | 'i' => {
+            'I', 'i' => {
                 t.parsing.part_of_speech = .pronoun;
                 t.parsing.interrogative = true;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'X' | 'x' => {
+            'X', 'x' => {
                 t.parsing.part_of_speech = .pronoun;
                 t.parsing.indefinite = true;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'Q' | 'q' => {
+            'Q', 'q' => {
                 t.parsing.part_of_speech = .pronoun;
                 t.parsing.interrogative = true;
                 t.parsing.correlative = true;
                 try parse_cng(t);
                 return t.parsing;
             },
-            'F' | 'f' => {
+            'F', 'f' => {
                 t.parsing.part_of_speech = .reflexive_pronoun;
                 if (p == '-') {
                     try parse_person(t);
@@ -110,7 +110,7 @@ pub fn parse_a(t: *Tokenizer) !Parsing {
         '-' => {
             parse_cng(t);
         },
-        'D' | 'd' => {
+        'D', 'd' => {
             if (c == 'v' or c == 'v') {
                 parse_adv_type(t);
             } else {
@@ -129,17 +129,20 @@ pub fn parse_vp(t: *Tokenizer) !void {
     const c = t.next();
     if (c == '2') {
         switch (t.next()) {
-            'F' | 'f' => {
+            'F', 'f' => {
                 t.parsing.tense_form = .second_future;
             },
-            'A' | 'a' => {
+            'A', 'a' => {
                 t.parsing.tense_form = .second_aorist;
             },
-            'R' | 'r' => {
+            'R', 'r' => {
                 t.parsing.tense_form = .second_perfect;
             },
-            'L' | 'l' => {
+            'L', 'l' => {
                 t.parsing.tense_form = .second_pluperfect;
+            },
+            0 => {
+                return error.Incomplete;
             },
             else => {
                 return error.InvalidParsing;
@@ -147,32 +150,79 @@ pub fn parse_vp(t: *Tokenizer) !void {
         }
     }
     switch (c) {
-        'P' | 'p' => {
+        'P', 'p' => {
             t.parsing.tense_form = .present;
         },
-        'I' | 'i' => {
+        'I', 'i' => {
             t.parsing.tense_form = .imperfect;
         },
-        'F' | 'f' => {
+        'F', 'f' => {
             t.parsing.tense_form = .future;
         },
-        'A' | 'a' => {
+        'A', 'a' => {
             t.parsing.tense_form = .aorist;
         },
-        'R' | 'r' => {
+        'R', 'r' => {
             t.parsing.tense_form = .perfect;
         },
-        'L' | 'l' => {
+        'L', 'l' => {
             t.parsing.tense_form = .pluperfect;
+        },
+        0 => {
+            return error.Incomplete;
         },
         else => {
             return error.InvalidParsing;
         },
     }
-}
+    switch (t.next()) {
+        'A', 'a' => {
+            t.parsing.voice = .active;
+        },
+        'M', 'm' => {
+            t.parsing.voice = .middle;
+        },
+        'P', 'p' => {
+            t.parsing.voice = .passive;
+        },
+        0 => {
+            return error.Incomplete;
+        },
+        else => {
+            return error.InvalidParsing;
+        },
+    }
+    switch (t.next()) {
+        'I', 'i' => {
+            t.parsing.mood = .indicative;
+        },
+        'M', 'm' => {
+            t.parsing.mood = .imperative;
+        },
+        'O', 'o' => {
+            t.parsing.mood = .optative;
+        },
+        'N', 'n' => {
+            t.parsing.mood = .infinitive;
+        },
+        'P', 'p' => {
+            t.parsing.mood = .participle;
+        },
+        'S', 's' => {
+            t.parsing.mood = .subjunctive;
+        },
+        0 => {
+            return error.Incomplete;
+        },
+        else => {
+            return error.InvalidParsing;
+        },
+    }
 
-pub fn parse_person(t: *Tokenizer) !void {
-    // case
+    if (t.next() != '-') {
+        return error.Incomplete;
+    }
+
     switch (t.next()) {
         '1' => {
             t.parsing.person = .first;
@@ -183,6 +233,47 @@ pub fn parse_person(t: *Tokenizer) !void {
         '3' => {
             t.parsing.person = .third;
         },
+        0 => {
+            return error.Incomplete;
+        },
+        else => {
+            return error.InvalidParsing;
+        },
+    }
+
+    switch (t.next()) {
+        'S', 's' => {
+            t.parsing.number = .singular;
+        },
+        'P', 'p' => {
+            t.parsing.number = .plural;
+        },
+        'D', 'd' => {
+            t.parsing.number = .dual;
+        },
+        0 => {
+            return error.Incomplete;
+        },
+        else => {
+            return error.InvalidParsing;
+        },
+    }
+}
+
+inline fn parse_person(t: *Tokenizer) !void {
+    switch (t.next()) {
+        '1' => {
+            t.parsing.person = .first;
+        },
+        '2' => {
+            t.parsing.person = .second;
+        },
+        '3' => {
+            t.parsing.person = .third;
+        },
+        0 => {
+            return error.Incomplete;
+        },
         else => {
             return error.InvalidParsing;
         },
@@ -192,20 +283,23 @@ pub fn parse_person(t: *Tokenizer) !void {
 pub fn parse_cng(t: *Tokenizer) !void {
     // case
     switch (t.next()) {
-        'N' | 'n' => {
+        'N', 'n' => {
             t.parsing.case = .nominative;
         },
-        'A' | 'a' => {
+        'A', 'a' => {
             t.parsing.case = .accusative;
         },
-        'G' | 'g' => {
+        'G', 'g' => {
             t.parsing.case = .genitive;
         },
-        'D' | 'd' => {
+        'D', 'd' => {
             t.parsing.case = .dative;
         },
-        'V' | 'v' => {
+        'V', 'v' => {
             t.parsing.case = .vocative;
+        },
+        0 => {
+            return error.Incomplete;
         },
         else => {
             return error.InvalidParsing;
@@ -214,34 +308,43 @@ pub fn parse_cng(t: *Tokenizer) !void {
 
     // number
     switch (t.next()) {
-        'S' | 's' | '1' => {
+        'S', 's', '1' => {
             t.parsing.number = .singular;
         },
-        'P' | 'p' | '2' => {
+        'P', 'p', '2' => {
             t.parsing.number = .plural;
         },
+        0 => {
+            return error.Incomplete;
+        },
         else => {
+            std.debug.print("unknown number\n", .{});
             return error.InvalidParsing;
         },
     }
 
     // gender
     switch (t.next()) {
-        'M' | 'm' => {
+        'M', 'm' => {
             t.parsing.gender = .masculine;
         },
-        'F' | 'f' => {
+        'F', 'f' => {
             t.parsing.gender = .feminine;
         },
-        'N' | 'N' => {
+        'N', 'n' => {
             t.parsing.gender = .neuter;
         },
+        0 => {
+            return error.Incomplete;
+        },
         else => {
+            std.debug.print("unknown gender\n", .{});
             return error.InvalidParsing;
         },
     }
 
     if (!is_breaking(t.next())) {
+        std.debug.print("unexpected parsing terminator\n", .{});
         return error.InvalidParsing;
     }
 }
@@ -249,20 +352,23 @@ pub fn parse_cng(t: *Tokenizer) !void {
 pub fn parse_adv_type(t: *Tokenizer) !Parsing {
     // case
     switch (t.next()) {
-        'I' | 'i' => {
+        'I', 'i' => {
             t.parsing.interrogative = true;
         },
-        'K' | 'k' => {
+        'K', 'k' => {
             t.parsing.correlative = true;
         },
-        'N' | 'n' => {
+        'N', 'n' => {
             t.parsing.negative = true;
         },
-        'C' | 'c' => {
+        'C', 'c' => {
             t.parsing.comparative = true;
         },
-        'S' | 's' => {
+        'S', 's' => {
             t.parsing.superlative = true;
+        },
+        0 => {
+            return error.Incomplete;
         },
         else => {
             return error.InvalidParsing;
@@ -312,36 +418,52 @@ const Tokenizer = struct {
 };
 
 inline fn is_breaking(c: u8) bool {
-    return (c == ' ' or c == '{' or c == '}' or c == '[' or c == ']' or c == '(' or c == ')' or c == '.' or c == '\"' or c == '\'');
+    return (c == ' ' or c == '{' or c == '}' or c == '[' or c == ']' or c == '(' or c == ')' or c == '.' or c == '\"' or c == '\'' or c == 0);
 }
 
 const expectEqual = std.testing.expectEqual;
 const expectError = std.testing.expectError;
 
+test "token reader" {
+    const data = "abc";
+    var t: Tokenizer = .{
+        .data = data,
+        .index = 0,
+        .limit = data.len,
+        .parsing = .{},
+    };
+    t.skip();
+    try expectEqual('a', t.next());
+    try expectEqual('b', t.peek());
+    try expectEqual('b', t.next());
+    t.skip();
+    try expectEqual('c', t.next());
+}
+
 test "simple parsing tests" {
     // Some basic sanity checks.
-    expectEqual(Parsing{
+    try expectEqual(Parsing{
         .part_of_speech = .noun,
         .case = .nominative,
         .number = .singular,
         .gender = .masculine,
-    }, parse("N-NSM"));
-    expectEqual(Parsing{
+    }, try parse("N-NSM"));
+    try expectEqual(Parsing{
         .part_of_speech = .article,
         .case = .genitive,
         .number = .plural,
         .gender = .feminine,
-    }, parse("T-GSF"));
-    expectEqual(Parsing{
+    }, try parse("T-GPF"));
+    try expectEqual(Parsing{
         .part_of_speech = .verb,
         .tense_form = .present,
         .voice = .active,
         .mood = .indicative,
         .person = .second,
         .number = .plural,
-    }, parse("V-PAI-2P"));
+    }, try parse("V-PAI-2P"));
 
-    expectError(error.InvalidParsing, parse("M-GSF"));
-    expectError(error.Incomplete, parse("A-GS"));
-    expectError(error.Incomplete, parse("V"));
+    try expectError(error.InvalidParsing, parse("M-GSF"));
+    try expectError(error.Incomplete, parse("A-GS"));
+    try expectError(error.Incomplete, parse("V"));
 }
