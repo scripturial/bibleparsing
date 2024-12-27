@@ -379,6 +379,20 @@ pub fn parse_cng(t: *Tokenizer) !void {
         'P', 'p', '2' => {
             t.parsing.number = .plural;
         },
+        'U', 'u' => {
+            // NUI is a special CNG
+            if (t.parsing.case != .nominative) {
+                return error.InvalidParsing;
+            }
+            const p = t.peek();
+            if (p == 'I' or p == 'i') {
+                t.parsing.case = .unknown;
+                t.parsing.part_of_speech = .numeral;
+                t.parsing.indeclinable = true;
+                return;
+            }
+            return error.InvalidParsing;
+        },
         0 => {
             return error.Incomplete;
         },

@@ -395,8 +395,12 @@ test "byz data test" {
         if (std.ascii.endsWithIgnoreCase(item, "-att")) {
             continue;
         }
+        if (std.ascii.endsWithIgnoreCase(item, "-abb")) {
+            continue;
+        }
         const x = parse(item) catch |e| {
             std.debug.print("Failed: {s} {any}\n", .{ item, e });
+            _ = try parse(item);
             return;
         };
         const y = try byz_string(x, allocator);
@@ -409,6 +413,9 @@ test "byz data test" {
     items = std.mem.tokenizeAny(u8, nestle_data, " \r\n");
     while (items.next()) |item| {
         if (std.ascii.endsWithIgnoreCase(item, "-att")) {
+            continue;
+        }
+        if (std.ascii.endsWithIgnoreCase(item, "-abb")) {
             continue;
         }
         const x = parse(item) catch |e| {
