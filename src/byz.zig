@@ -137,7 +137,7 @@ pub fn byz_string(p: parsing.Parsing, allocator: std.mem.Allocator) !std.ArrayLi
         },
         .personal_pronoun => {
             try b.append('P');
-            try append_pcn(p, &b);
+            try append_personal_pronoun(p, &b);
             try append_flag(p, &b);
             return b;
         },
@@ -225,12 +225,14 @@ inline fn append_person(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
     }
 }
 
-inline fn append_pcn(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
+inline fn append_personal_pronoun(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
     switch (p.person) {
         .first => try b.appendSlice("-1"),
         .second => try b.appendSlice("-2"),
-        .third => try b.appendSlice("-3"),
-        else => return,
+        else => {
+            try append_cng(p, b);
+            return;
+        },
     }
     switch (p.case) {
         .nominative => try b.append('N'),

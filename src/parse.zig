@@ -103,7 +103,7 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
             },
             'P', 'p' => {
                 t.parsing.part_of_speech = .personal_pronoun;
-                try parse_pcn(t);
+                try parse_personal_pronoun(t);
                 return t.parsing;
             },
             else => {
@@ -345,8 +345,8 @@ inline fn parse_ref_n(t: *Tokenizer) !void {
     }
 }
 
-pub fn parse_pcn(t: *Tokenizer) !void {
-    switch (t.next()) {
+pub fn parse_personal_pronoun(t: *Tokenizer) !void {
+    switch (t.peek()) {
         '1' => {
             t.parsing.person = .first;
         },
@@ -357,9 +357,11 @@ pub fn parse_pcn(t: *Tokenizer) !void {
             return error.Incomplete;
         },
         else => {
-            return error.InvalidParsing;
+            try parse_cng(t);
+            return;
         },
     }
+    _ = t.next();
 
     switch (t.next()) {
         'N', 'n' => {
