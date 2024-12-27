@@ -121,6 +121,7 @@ pub fn byz_string(p: parsing.Parsing, allocator: std.mem.Allocator) !std.ArrayLi
         .demonstrative_pronoun => {
             try b.append('D');
             try append_cng(p, &b);
+            try append_flag(p, &b);
             return b;
         },
         .reflexive_pronoun => {

@@ -41,7 +41,7 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
                 return t.parsing;
             },
             'C', 'c' => {
-                t.parsing.part_of_speech = .relative_pronoun;
+                t.parsing.part_of_speech = .reciprocal_pronoun;
                 try parse_cng(t);
                 return t.parsing;
             },
