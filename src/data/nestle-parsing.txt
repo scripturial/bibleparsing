@@ -700,7 +700,6 @@ V-APS-2P
 V-APS-2S
 V-APS-3P
 V-APS-3S
-V-APS2P
 V-FAI-1P
 V-FAI-1S
 V-FAI-1S-ATT
@@ -1088,5 +1087,3 @@ X-NPN
 X-NSF
 X-NSM
 X-NSN
-form_morph
-strongs
