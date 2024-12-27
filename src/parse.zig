@@ -133,6 +133,7 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
     }
     if ((c == 'H' or c == 'h') and (d == 'E' or d == 'e') and (e == 'B' or e == 'b')) {
         t.parsing.part_of_speech = .hebrew_transliteration;
+        try parse_flag(t);
         return t.parsing;
     }
     // Four letter pos
@@ -151,10 +152,12 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
     }
     if ((c == 'A' or c == 'a') and (d == 'R' or d == 'r') and (e == 'A' or e == 'a') and (f == 'M' or f == 'm')) {
         t.parsing.part_of_speech = .aramaic_transliteration;
+        try parse_flag(t);
         return t.parsing;
     }
     if ((c == 'P' or c == 'p') and (d == 'R' or d == 'r') and (e == 'E' or e == 'e') and (f == 'P' or f == 'p')) {
         t.parsing.part_of_speech = .preposition;
+        try parse_flag(t);
         return t.parsing;
     }
 
@@ -254,6 +257,7 @@ pub fn parse_vp(t: *Tokenizer) !void {
         },
         'N', 'n' => {
             t.parsing.mood = .infinitive;
+            try parse_flag(t);
             return;
         },
         'P', 'p' => {
@@ -313,6 +317,8 @@ pub fn parse_vp(t: *Tokenizer) !void {
             return error.InvalidParsing;
         },
     }
+
+    try parse_flag(t);
 }
 
 inline fn parse_person(t: *Tokenizer) !void {
@@ -450,6 +456,7 @@ pub fn parse_cng(t: *Tokenizer) !void {
             if (l == 'I' or l == 'i') {
                 t.parsing.part_of_speech = .letter;
                 t.parsing.indeclinable = true;
+                try parse_flag(t);
                 return;
             }
             return error.InvalidParsing;
@@ -459,6 +466,7 @@ pub fn parse_cng(t: *Tokenizer) !void {
             if (l == 'I' or l == 'i') {
                 t.parsing.part_of_speech = .noun;
                 t.parsing.indeclinable = true;
+                try parse_flag(t);
                 return;
             }
             return error.InvalidParsing;
@@ -472,6 +480,7 @@ pub fn parse_cng(t: *Tokenizer) !void {
             if (l == 'I' or l == 'i') {
                 t.parsing.part_of_speech = .proper_noun;
                 t.parsing.indeclinable = true;
+                try parse_flag(t);
                 return;
             }
             return error.InvalidParsing;
@@ -502,6 +511,8 @@ pub fn parse_cng(t: *Tokenizer) !void {
                 t.parsing.case = .unknown;
                 t.parsing.part_of_speech = .numeral;
                 t.parsing.indeclinable = true;
+                _ = t.next();
+                try parse_flag(t);
                 return;
             }
             return error.InvalidParsing;

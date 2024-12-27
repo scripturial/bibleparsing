@@ -494,6 +494,14 @@ test "byz data test" {
             defer y.deinit();
             try expectEqualStrings(item, y.items);
         }
+
+        {
+            // Test entry when it has brackets
+            var item2 = std.ArrayList(u8).init(allocator);
+            try item2.appendSlice(item);
+            try item2.append('K');
+            try expectError(error.InvalidParsing, parse(item2.items));
+        }
     }
 
     //const nestle_data = "T-APN\nA-NSN";
