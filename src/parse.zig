@@ -408,6 +408,8 @@ pub fn parse_cng(t: *Tokenizer) !void {
         },
     }
 
+    try parse_flag(t);
+
     if (!is_breaking(t.next())) {
         std.debug.print("unexpected parsing terminator\n", .{});
         return error.InvalidParsing;
@@ -418,6 +420,26 @@ inline fn parse_flag(t: *Tokenizer) !void {
     if (t.peek() == '-') {
         _ = t.next();
         switch (t.next()) {
+            'A', 'a' => {
+                const x = t.peek();
+                if (x == 'T' or x == 't') {
+                    _ = t.next();
+                    const y = t.peek();
+                    if (y != 'T' and y != 't') {
+                        return error.InvalidParsing;
+                    }
+                    _ = t.next();
+                } else if (x == 'B' and x == 'B') {
+                    _ = t.next();
+                    const y = t.peek();
+                    if (y != 'B' and y != 'b') {
+                        return error.InvalidParsing;
+                    }
+                    _ = t.next();
+                } else {
+                    return error.InvalidParsing;
+                }
+            },
             'I', 'i' => {
                 t.parsing.interrogative = true;
             },
