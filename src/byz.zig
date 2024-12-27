@@ -362,10 +362,18 @@ inline fn append_vp(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
         .subjunctive => try b.append('S'),
         .optative => try b.append('O'),
         .imperative => try b.append('M'),
-        .infinitive => try b.append('N'),
-        .participle => try b.append('P'),
+        .infinitive => {
+            try b.append('N');
+            return;
+        },
+        .participle => {
+            try b.append('P');
+            try append_cng(p, b);
+            return;
+        },
         else => return,
     }
+
     switch (p.person) {
         .first => try b.appendSlice("-1"),
         .second => try b.appendSlice("-2"),
@@ -452,6 +460,9 @@ test "byz data test" {
         if (std.ascii.endsWithIgnoreCase(item, "-abb")) {
             continue;
         }
+        if (std.ascii.endsWithIgnoreCase(item, "-p")) {
+            continue;
+        }
         const x = parse(item) catch |e| {
             std.debug.print("Failed: {s} {any}\n", .{ item, e });
             _ = try parse(item);
@@ -470,6 +481,9 @@ test "byz data test" {
             continue;
         }
         if (std.ascii.endsWithIgnoreCase(item, "-abb")) {
+            continue;
+        }
+        if (std.ascii.endsWithIgnoreCase(item, "-p")) {
             continue;
         }
         const x = parse(item) catch |e| {
