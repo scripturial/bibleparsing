@@ -132,7 +132,6 @@ pub fn byz_string(p: parsing.Parsing, allocator: std.mem.Allocator) !std.ArrayLi
         .possessive_pronoun => {
             try b.append('S');
             try append_ref(p, &b);
-            try append_cng(p, &b);
             return b;
         },
         .personal_pronoun => {
@@ -251,11 +250,36 @@ inline fn append_personal_pronoun(p: parsing.Parsing, b: *std.ArrayList(u8)) !vo
 }
 
 inline fn append_ref(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
-    try append_person(p, b);
-    switch (p.tense_form) {
-        .ref_singular => try b.appendSlice("-S"),
-        .ref_plural => try b.appendSlice("-P"),
+    switch (p.person) {
+        .first => try b.appendSlice("-1"),
+        .second => try b.appendSlice("-2"),
+        .third => try b.appendSlice("-3"),
         else => return,
+    }
+    switch (p.tense_form) {
+        .ref_singular => try b.appendSlice("S"),
+        .ref_plural => try b.appendSlice("P"),
+        else => return,
+    }
+    switch (p.case) {
+        .nominative => try b.appendSlice("N"),
+        .accusative => try b.appendSlice("A"),
+        .genitive => try b.appendSlice("G"),
+        .dative => try b.appendSlice("D"),
+        .vocative => try b.appendSlice("V"),
+        else => return,
+    }
+    switch (p.number) {
+        .singular => try b.append('S'),
+        .plural => try b.append('P'),
+        else => return,
+    }
+    switch (p.gender) {
+        .masculine => try b.append('M'),
+        .feminine => try b.append('F'),
+        .neuter => try b.append('N'),
+        .masculine_feminine => try b.append('C'),
+        .unknown => try b.append('U'),
     }
 }
 
@@ -317,6 +341,10 @@ inline fn append_vp(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
         .aorist => try b.appendSlice("-A"),
         .perfect => try b.appendSlice("-R"),
         .pluperfect => try b.appendSlice("-L"),
+        .second_aorist => try b.appendSlice("-2A"),
+        .second_future => try b.appendSlice("-2F"),
+        .second_perfect => try b.appendSlice("-2R"),
+        .second_pluperfect => try b.appendSlice("-2L"),
         else => return,
     }
     switch (p.voice) {

@@ -97,7 +97,8 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
                 t.parsing.part_of_speech = .possessive_pronoun;
                 // What is the meaning of the character data[3]?
                 // See https://github.com/byztxt/byzantine-majority-text/issues/10
-                _ = t.next();
+                //_ = t.next();
+                try parse_ref(t);
                 try parse_cng(t);
                 return t.parsing;
             },
@@ -184,32 +185,33 @@ pub fn parse_vp(t: *Tokenizer) !void {
                 return error.InvalidParsing;
             },
         }
-    }
-    switch (c) {
-        'P', 'p' => {
-            t.parsing.tense_form = .present;
-        },
-        'I', 'i' => {
-            t.parsing.tense_form = .imperfect;
-        },
-        'F', 'f' => {
-            t.parsing.tense_form = .future;
-        },
-        'A', 'a' => {
-            t.parsing.tense_form = .aorist;
-        },
-        'R', 'r' => {
-            t.parsing.tense_form = .perfect;
-        },
-        'L', 'l' => {
-            t.parsing.tense_form = .pluperfect;
-        },
-        0 => {
-            return error.Incomplete;
-        },
-        else => {
-            return error.InvalidParsing;
-        },
+    } else {
+        switch (c) {
+            'P', 'p' => {
+                t.parsing.tense_form = .present;
+            },
+            'I', 'i' => {
+                t.parsing.tense_form = .imperfect;
+            },
+            'F', 'f' => {
+                t.parsing.tense_form = .future;
+            },
+            'A', 'a' => {
+                t.parsing.tense_form = .aorist;
+            },
+            'R', 'r' => {
+                t.parsing.tense_form = .perfect;
+            },
+            'L', 'l' => {
+                t.parsing.tense_form = .pluperfect;
+            },
+            0 => {
+                return error.Incomplete;
+            },
+            else => {
+                return error.InvalidParsing;
+            },
+        }
     }
     switch (t.next()) {
         'A', 'a' => {
@@ -252,6 +254,7 @@ pub fn parse_vp(t: *Tokenizer) !void {
         },
         'N', 'n' => {
             t.parsing.mood = .infinitive;
+            return;
         },
         'P', 'p' => {
             t.parsing.mood = .participle;
@@ -269,6 +272,10 @@ pub fn parse_vp(t: *Tokenizer) !void {
 
     if (t.next() != '-') {
         return error.Incomplete;
+    }
+    if (t.parsing.mood == .participle) {
+        try parse_cng(t);
+        return;
     }
 
     switch (t.next()) {
@@ -328,7 +335,22 @@ inline fn parse_person(t: *Tokenizer) !void {
     }
 }
 
-inline fn parse_ref_n(t: *Tokenizer) !void {
+inline fn parse_ref(t: *Tokenizer) !void {
+    switch (t.next()) {
+        '1' => {
+            t.parsing.person = .first;
+        },
+        '2' => {
+            t.parsing.person = .second;
+        },
+        0 => {
+            return error.Incomplete;
+        },
+        else => {
+            return error.InvalidParsing;
+        },
+    }
+
     switch (t.next()) {
         'S', 's', '1' => {
             t.parsing.tense_form = .ref_singular;
