@@ -90,6 +90,7 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
                 if (p == '-') {
                     try parse_person(t);
                 }
+                try parse_cng(t);
                 return t.parsing;
             },
             'S', 's' => {
@@ -102,8 +103,7 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
             },
             'P', 'p' => {
                 t.parsing.part_of_speech = .personal_pronoun;
-                try parse_person(t);
-                try parse_ref_n(t);
+                try parse_pcn(t);
                 return t.parsing;
             },
             else => {
@@ -330,10 +330,10 @@ inline fn parse_person(t: *Tokenizer) !void {
 
 inline fn parse_ref_n(t: *Tokenizer) !void {
     switch (t.next()) {
-        'S' | 's' | '1' => {
+        'S', 's', '1' => {
             t.parsing.tense_form = .ref_singular;
         },
-        'P' | 'p' | '2' => {
+        'P', 'p', '2' => {
             t.parsing.tense_form = .ref_plural;
         },
         0 => {
@@ -343,6 +343,64 @@ inline fn parse_ref_n(t: *Tokenizer) !void {
             return error.InvalidParsing;
         },
     }
+}
+
+pub fn parse_pcn(t: *Tokenizer) !void {
+    switch (t.next()) {
+        '1' => {
+            t.parsing.person = .first;
+        },
+        '2' => {
+            t.parsing.person = .second;
+        },
+        0 => {
+            return error.Incomplete;
+        },
+        else => {
+            return error.InvalidParsing;
+        },
+    }
+
+    switch (t.next()) {
+        'N', 'n' => {
+            t.parsing.case = .nominative;
+        },
+        'A', 'a' => {
+            t.parsing.case = .accusative;
+        },
+        'G', 'g' => {
+            t.parsing.case = .genitive;
+        },
+        'D', 'd' => {
+            t.parsing.case = .dative;
+        },
+        'V', 'v' => {
+            t.parsing.case = .vocative;
+        },
+        0 => {
+            return error.Incomplete;
+        },
+        else => {
+            return error.InvalidParsing;
+        },
+    }
+
+    switch (t.next()) {
+        'S', 's', '1' => {
+            t.parsing.tense_form = .ref_singular;
+        },
+        'P', 'p', '2' => {
+            t.parsing.tense_form = .ref_plural;
+        },
+        0 => {
+            return error.Incomplete;
+        },
+        else => {
+            return error.InvalidParsing;
+        },
+    }
+
+    try parse_flag(t);
 }
 
 pub fn parse_cng(t: *Tokenizer) !void {
@@ -362,6 +420,37 @@ pub fn parse_cng(t: *Tokenizer) !void {
         },
         'V', 'v' => {
             t.parsing.case = .vocative;
+        },
+        'L', 'l' => { // N-LI is letter
+            const l = t.next();
+            if (l == 'I' or l == 'i') {
+                t.parsing.part_of_speech = .letter;
+                t.parsing.indeclinable = true;
+                return;
+            }
+            return error.InvalidParsing;
+        },
+        'O', 'o' => { // N-OI is letter
+            const l = t.next();
+            if (l == 'I' or l == 'i') {
+                t.parsing.part_of_speech = .noun;
+                t.parsing.indeclinable = true;
+                return;
+            }
+            return error.InvalidParsing;
+        },
+        'P', 'p' => { // N-PRI
+            const r = t.next();
+            if (r != 'R' and r != 'r') {
+                return error.InvalidParsing;
+            }
+            const l = t.next();
+            if (l == 'I' or l == 'i') {
+                t.parsing.part_of_speech = .proper_noun;
+                t.parsing.indeclinable = true;
+                return;
+            }
+            return error.InvalidParsing;
         },
         0 => {
             return error.Incomplete;

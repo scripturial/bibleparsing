@@ -125,20 +125,20 @@ pub fn byz_string(p: parsing.Parsing, allocator: std.mem.Allocator) !std.ArrayLi
             return b;
         },
         .reflexive_pronoun => {
-            try b.appendSlice("F-");
-            try append_person(p, &b);
-            try append_cng(p, &b);
+            try b.append('F');
+            try append_fcng(p, &b);
             return b;
         },
         .possessive_pronoun => {
-            try b.appendSlice("S-");
+            try b.append('S');
             try append_ref(p, &b);
             try append_cng(p, &b);
             return b;
         },
         .personal_pronoun => {
-            try b.appendSlice("P-");
+            try b.append('P');
             try append_pcn(p, &b);
+            try append_flag(p, &b);
             return b;
         },
         .proper_noun => {
@@ -221,7 +221,7 @@ inline fn append_person(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
         .first => try b.append('1'),
         .second => try b.append('2'),
         .third => try b.append('3'),
-        else => return,
+        .unknown => return error.Incomplete,
     }
 }
 
@@ -240,34 +240,57 @@ inline fn append_pcn(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
         .vocative => try b.append('V'),
         else => return,
     }
-    switch (p.number) {
-        .singular => try b.append('S'),
-        .plural => try b.append('P'),
+    switch (p.tense_form) {
+        .ref_singular => try b.append('S'),
+        .ref_plural => try b.append('P'),
         else => return,
     }
-    if (p.crasis) {
-        try b.appendSlice("-K");
-    }
-
     return;
 }
 
 inline fn append_ref(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
     try append_person(p, b);
     switch (p.tense_form) {
-        .ref_singular => try b.append('S'),
-        .ref_plural => try b.append('P'),
+        .ref_singular => try b.appendSlice("-S"),
+        .ref_plural => try b.appendSlice("-P"),
         else => return,
     }
 }
 
-fn append_cng(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
+inline fn append_cng(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
     switch (p.case) {
         .nominative => try b.appendSlice("-N"),
         .accusative => try b.appendSlice("-A"),
         .genitive => try b.appendSlice("-G"),
         .dative => try b.appendSlice("-D"),
         .vocative => try b.appendSlice("-V"),
+        else => return,
+    }
+    switch (p.number) {
+        .singular => try b.append('S'),
+        .plural => try b.append('P'),
+        else => return,
+    }
+    switch (p.gender) {
+        .masculine => try b.append('M'),
+        .feminine => try b.append('F'),
+        .neuter => try b.append('N'),
+        .masculine_feminine => try b.append('C'),
+        .unknown => try b.append('U'),
+    }
+}
+
+inline fn append_fcng(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
+    if (p.person != .unknown) {
+        try b.append('-');
+    }
+    try append_person(p, b);
+    switch (p.case) {
+        .nominative => try b.append('N'),
+        .accusative => try b.append('A'),
+        .genitive => try b.append('G'),
+        .dative => try b.append('D'),
+        .vocative => try b.append('V'),
         else => return,
     }
     switch (p.number) {
