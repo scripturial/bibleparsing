@@ -643,10 +643,10 @@ const Tokenizer = struct {
             if (is_breaking(c)) {
                 // Increment over valid/plausible leading characters
                 self.index += 1;
+                continue;
             }
             return;
         }
-        return;
     }
 };
 

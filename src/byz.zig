@@ -446,6 +446,7 @@ test "simple byz string tests" {
 }
 
 const parse = @import("parse.zig").parse;
+const expectError = std.testing.expectError;
 
 test "byz data test" {
     const allocator = std.heap.page_allocator;
@@ -454,6 +455,7 @@ test "byz data test" {
     const byz_data = @embedFile("data/byz-parsing.txt");
     var items = std.mem.tokenizeAny(u8, byz_data, " \r\n");
     while (items.next()) |item| {
+        // Ignore unhandled types
         if (std.ascii.endsWithIgnoreCase(item, "-att")) {
             continue;
         }
@@ -463,20 +465,42 @@ test "byz data test" {
         if (std.ascii.endsWithIgnoreCase(item, "-p")) {
             continue;
         }
-        const x = parse(item) catch |e| {
-            std.debug.print("Failed: {s} {any}\n", .{ item, e });
-            _ = try parse(item);
-            return;
-        };
-        const y = try byz_string(x, allocator);
-        defer y.deinit();
-        try expectEqualStrings(item, y.items);
+
+        // Test entry exactly as in the file.
+        {
+            const x = parse(item) catch |e| {
+                std.debug.print("Failed: {s} {any}\n", .{ item, e });
+                _ = try parse(item);
+                return;
+            };
+            const y = try byz_string(x, allocator);
+            defer y.deinit();
+            try expectEqualStrings(item, y.items);
+        }
+
+        {
+            // Test entry when it has brackets
+            var item2 = std.ArrayList(u8).init(allocator);
+            try item2.append(' ');
+            try item2.append('[');
+            try item2.appendSlice(item);
+            try item2.append(']');
+            const x = parse(item2.items) catch |e| {
+                std.debug.print("Failed: {s} {any}\n", .{ item2.items, e });
+                _ = try parse(item2.items);
+                return;
+            };
+            const y = try byz_string(x, allocator);
+            defer y.deinit();
+            try expectEqualStrings(item, y.items);
+        }
     }
 
     //const nestle_data = "T-APN\nA-NSN";
     const nestle_data = @embedFile("data/nestle-parsing.txt");
     items = std.mem.tokenizeAny(u8, nestle_data, " \r\n");
     while (items.next()) |item| {
+        // Ignore unhandled types
         if (std.ascii.endsWithIgnoreCase(item, "-att")) {
             continue;
         }
@@ -486,6 +510,7 @@ test "byz data test" {
         if (std.ascii.endsWithIgnoreCase(item, "-p")) {
             continue;
         }
+        // Test entry exactly as in the file.
         const x = parse(item) catch |e| {
             std.debug.print("Failed: {s} {any}\n", .{ item, e });
             return;
