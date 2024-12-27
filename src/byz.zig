@@ -379,3 +379,29 @@ test "simple byz string tests" {
         try expectEqualStrings("V-PAI-1P", i.items);
     }
 }
+
+const parse = @import("parse.zig").parse;
+
+test "byz data test" {
+    const allocator = std.heap.page_allocator;
+
+    //const byz_data = "N-GSF\nT-APN";
+    const byz_data = @embedFile("data/byz-parsing.txt");
+    var items = std.mem.tokenizeAny(u8, byz_data, " \r\n");
+    while (items.next()) |item| {
+        const x = try parse(item);
+        const y = try byz_string(x, allocator);
+        defer y.deinit();
+        try expectEqualStrings(item, y.items);
+    }
+
+    //const nestle_data = "T-APN\nA-NSN";
+    const nestle_data = @embedFile("data/nestle-parsing.txt");
+    items = std.mem.tokenizeAny(u8, nestle_data, " \r\n");
+    while (items.next()) |item| {
+        const x = try parse(item);
+        const y = try byz_string(x, allocator);
+        defer y.deinit();
+        try expectEqualStrings(item, y.items);
+    }
+}
