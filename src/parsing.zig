@@ -1,3 +1,5 @@
+/// Packs parsing information about a biblical
+/// greek word into a u32.
 pub const Parsing = packed struct(u32) {
     part_of_speech: PartOfSpeech = .unknown,
     tense_form: TenseForm = .unknown,

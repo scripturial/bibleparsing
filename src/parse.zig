@@ -3,6 +3,9 @@ const Parsing = @import("parsing.zig").Parsing;
 
 pub const Error = error{ InvalidParsing, Incomplete };
 
+/// convert a byzantine text style parsing string into
+/// a u32 by reading from a u8 string, or return an
+/// error if it is inavlid.
 pub fn parse(data: []const u8) !Parsing {
     var t: Tokenizer = .{
         .data = data,
@@ -13,6 +16,9 @@ pub fn parse(data: []const u8) !Parsing {
     return parse_data(&t);
 }
 
+/// convert a byzantine text style parsing string into
+/// a u32 by reading from a tokenizer object, or return
+/// an error if it is inavlid.
 pub fn parse_data(t: *Tokenizer) !Parsing {
     t.skip();
     const c = t.next();
@@ -164,7 +170,8 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
     return error.InvalidParsing;
 }
 
-pub fn parse_vp(t: *Tokenizer) !void {
+/// Parse the verb part of a verb parsing string
+fn parse_vp(t: *Tokenizer) !void {
     // tense-form
     const c = t.next();
     if (c == '2') {
@@ -433,6 +440,8 @@ pub fn parse_personal_pronoun(t: *Tokenizer) !void {
     try parse_flag(t);
 }
 
+/// parse a case, number, gender sequence that may appear in
+/// a wide variety of different parts of speech.
 pub fn parse_cng(t: *Tokenizer) !void {
     // case
     switch (t.next()) {
@@ -554,6 +563,8 @@ pub fn parse_cng(t: *Tokenizer) !void {
     }
 }
 
+/// Parse the trailing end component of a parsing string that
+/// may or may not appear at the end of the string.
 inline fn parse_flag(t: *Tokenizer) !void {
     if (t.peek() == '-') {
         _ = t.next();
@@ -661,6 +672,7 @@ const Tokenizer = struct {
     }
 };
 
+/// returns true for any character that starts or ends a parsing code.
 inline fn is_breaking(c: u8) bool {
     return (c == ' ' or c == '{' or c == '}' or c == '[' or c == ']' or c == '(' or c == ')' or c == '.' or c == '\"' or c == '\'' or c == 0);
 }
