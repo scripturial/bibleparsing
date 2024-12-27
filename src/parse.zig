@@ -92,6 +92,20 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
                 }
                 return t.parsing;
             },
+            'S', 's' => {
+                t.parsing.part_of_speech = .possessive_pronoun;
+                // What is the meaning of the character data[3]?
+                // See https://github.com/byztxt/byzantine-majority-text/issues/10
+                _ = t.next();
+                try parse_cng(t);
+                return t.parsing;
+            },
+            'P', 'p' => {
+                t.parsing.part_of_speech = .personal_pronoun;
+                try parse_person(t);
+                try parse_ref_n(t);
+                return t.parsing;
+            },
             else => {
                 return error.InvalidParsing;
             },
@@ -116,9 +130,13 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
         try parse_flag(t);
         return t.parsing;
     }
+    if ((c == 'H' or c == 'h') and (d == 'E' or d == 'e') and (e == 'B' or e == 'b')) {
+        t.parsing.part_of_speech = .hebrew_transliteration;
+        return t.parsing;
+    }
     // Four letter pos
     const f = t.next();
-    if ((c == 'C' or c == 'c') and (d == 'O' or d == 'o') and (e == 'N' or c == 'n')) {
+    if ((c == 'C' or c == 'c') and (d == 'O' or d == 'o') and (e == 'N' or e == 'n')) {
         if (f == 'D' or f == 'd') {
             t.parsing.part_of_speech = .conditional;
             try parse_flag(t);
@@ -129,6 +147,14 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
             try parse_flag(t);
             return t.parsing;
         }
+    }
+    if ((c == 'A' or c == 'a') and (d == 'R' or d == 'r') and (e == 'A' or e == 'a') and (f == 'M' or f == 'm')) {
+        t.parsing.part_of_speech = .aramaic_transliteration;
+        return t.parsing;
+    }
+    if ((c == 'P' or c == 'p') and (d == 'R' or d == 'r') and (e == 'E' or e == 'e') and (f == 'P' or f == 'p')) {
+        t.parsing.part_of_speech = .preposition;
+        return t.parsing;
     }
 
     return error.InvalidParsing;
@@ -302,6 +328,23 @@ inline fn parse_person(t: *Tokenizer) !void {
     }
 }
 
+inline fn parse_ref_n(t: *Tokenizer) !void {
+    switch (t.next()) {
+        'S' | 's' | '1' => {
+            t.parsing.tense_form = .ref_singular;
+        },
+        'P' | 'p' | '2' => {
+            t.parsing.tense_form = .ref_plural;
+        },
+        0 => {
+            return error.Incomplete;
+        },
+        else => {
+            return error.InvalidParsing;
+        },
+    }
+}
+
 pub fn parse_cng(t: *Tokenizer) !void {
     // case
     switch (t.next()) {
@@ -387,6 +430,9 @@ inline fn parse_flag(t: *Tokenizer) !void {
             },
             'N', 'n' => {
                 t.parsing.negative = true;
+            },
+            'P', 'p' => {
+                // Appears one time in nestle, Acts 2:18.
             },
             'C', 'c' => {
                 switch (t.parsing.part_of_speech) {

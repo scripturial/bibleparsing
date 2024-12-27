@@ -2,8 +2,6 @@ pub const Parsing = packed struct(u32) {
     part_of_speech: PartOfSpeech = .unknown,
     tense_form: TenseForm = .unknown,
     mood: Mood = .unknown,
-    ref_singular: bool = false,
-    //ref_plural: bool = false,
     gender: Gender = .unknown,
     voice: Voice = .unknown,
     case: Case = .unknown,
@@ -15,6 +13,7 @@ pub const Parsing = packed struct(u32) {
     indefinite: bool = false,
     indeclinable: bool = false,
     crasis: bool = false,
+    unused: bool = false,
 };
 
 pub const PartOfSpeech = enum(u5) {
@@ -62,6 +61,9 @@ pub const TenseForm = enum(u4) {
     second_aorist = 8,
     second_perfect = 9,
     second_pluperfect = 10,
+    // Pack in some non verb field data
+    ref_singular = 11,
+    ref_plural = 12,
 };
 
 pub const Voice = enum(u3) {
