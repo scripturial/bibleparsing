@@ -4,81 +4,79 @@
 const std = @import("std");
 const parsing = @import("parsing.zig");
 
-pub fn byz_string(p: parsing.Parsing, allocator: std.mem.Allocator) !std.ArrayList(u8) {
-    var b = std.ArrayList(u8).init(allocator);
-
+pub fn string(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
     switch (p.part_of_speech) {
         .unknown => {
-            return b;
+            return;
         },
         .adverb => {
             try b.appendSlice("ADV");
-            try append_flag(p, &b);
-            return b;
+            try append_flag(p, b);
+            return;
         },
         .comparative_adverb => {
             try b.appendSlice("ADV-C");
-            return b;
+            return;
         },
         .superlative_adverb => {
             try b.appendSlice("ADV-S");
-            return b;
+            return;
         },
         .conjunction => {
             try b.appendSlice("CONJ");
-            try append_flag(p, &b);
-            return b;
+            try append_flag(p, b);
+            return;
         },
         .conditional => {
             try b.appendSlice("COND");
-            try append_flag(p, &b);
-            return b;
+            try append_flag(p, b);
+            return;
         },
         .particle => {
             try b.appendSlice("PRT");
-            try append_flag(p, &b);
-            return b;
+            try append_flag(p, b);
+            return;
         },
         .preposition => {
             try b.appendSlice("PREP");
-            try append_flag(p, &b);
-            return b;
+            try append_flag(p, b);
+            return;
         },
         .interjection => {
             try b.appendSlice("INJ");
-            try append_flag(p, &b);
-            return b;
+            try append_flag(p, b);
+            return;
         },
         .aramaic_transliteration => {
             try b.appendSlice("ARAM");
-            return b;
+            return;
         },
         .hebrew_transliteration => {
             try b.appendSlice("HEB");
-            return b;
+            return;
         },
         .proper_noun => {
             if (p.indeclinable) {
                 try b.appendSlice("N-PRI");
-                return b;
+                return;
             }
         },
         .numeral => {
             if (p.indeclinable) {
                 try b.appendSlice("A-NUI");
-                return b;
+                return;
             }
         },
         .letter => {
             if (p.indeclinable) {
                 try b.appendSlice("N-LI");
-                return b;
+                return;
             }
         },
         .noun => {
             if (p.indeclinable) {
                 try b.appendSlice("N-OI");
-                return b;
+                return;
             }
         },
         else => {},
@@ -87,132 +85,132 @@ pub fn byz_string(p: parsing.Parsing, allocator: std.mem.Allocator) !std.ArrayLi
     switch (p.part_of_speech) {
         .verb => {
             try b.append('V');
-            try append_vp(p, &b);
-            return b;
+            try append_vp(p, b);
+            return;
         },
         .noun => {
             try b.append('N');
-            try append_cng(p, &b);
-            try append_flag(p, &b);
-            return b;
+            try append_cng(p, b);
+            try append_flag(p, b);
+            return;
         },
         .article => {
             try b.append('T');
-            try append_cng(p, &b);
-            try append_flag(p, &b);
-            return b;
+            try append_cng(p, b);
+            try append_flag(p, b);
+            return;
         },
         .adjective => {
             try b.append('A');
-            try append_cng(p, &b);
-            try append_flag(p, &b);
-            return b;
+            try append_cng(p, b);
+            try append_flag(p, b);
+            return;
         },
         .relative_pronoun => {
             try b.append('R');
-            try append_cng(p, &b);
-            return b;
+            try append_cng(p, b);
+            return;
         },
         .reciprocal_pronoun => {
             try b.append('C');
-            try append_cng(p, &b);
-            return b;
+            try append_cng(p, b);
+            return;
         },
         .demonstrative_pronoun => {
             try b.append('D');
-            try append_cng(p, &b);
-            try append_flag(p, &b);
-            return b;
+            try append_cng(p, b);
+            try append_flag(p, b);
+            return;
         },
         .reflexive_pronoun => {
             try b.append('F');
-            try append_fcng(p, &b);
-            return b;
+            try append_fcng(p, b);
+            return;
         },
         .possessive_pronoun => {
             try b.append('S');
-            try append_ref(p, &b);
-            return b;
+            try append_ref(p, b);
+            return;
         },
         .personal_pronoun => {
             try b.append('P');
-            try append_personal_pronoun(p, &b);
-            try append_flag(p, &b);
-            return b;
+            try append_personal_pronoun(p, b);
+            try append_flag(p, b);
+            return;
         },
         .proper_noun => {
             if (p.indeclinable) {
                 try b.appendSlice("IPN");
-                try append_cng(p, &b);
-                return b;
+                try append_cng(p, b);
+                return;
             }
             try b.appendSlice("PN");
-            try append_cng(p, &b);
-            return b;
+            try append_cng(p, b);
+            return;
         },
         .pronoun => {
             if (p.correlative and p.interrogative) {
                 try b.appendSlice("Q");
-                try append_cng(p, &b);
-                return b;
+                try append_cng(p, b);
+                return;
             }
             if (p.correlative) {
                 try b.appendSlice("K");
-                try append_cng(p, &b);
-                return b;
+                try append_cng(p, b);
+                return;
             }
             if (p.interrogative) {
                 try b.appendSlice("I");
-                try append_cng(p, &b);
-                return b;
+                try append_cng(p, b);
+                return;
             }
             if (p.indefinite) {
                 try b.appendSlice("X");
-                try append_cng(p, &b);
-                return b;
+                try append_cng(p, b);
+                return;
             }
             try b.appendSlice("O");
-            try append_cng(p, &b);
-            return b;
+            try append_cng(p, b);
+            return;
         },
         .superlative_adverb => {
             try b.appendSlice("ADV-S");
-            try append_flag(p, &b);
-            return b;
+            try append_flag(p, b);
+            return;
         },
         .superlative_noun => {
             try b.appendSlice("N");
-            try append_cng(p, &b);
+            try append_cng(p, b);
             try b.appendSlice("-S");
-            return b;
+            return;
         },
         .superlative_adjective => {
             try b.appendSlice("A");
-            try append_cng(p, &b);
+            try append_cng(p, b);
             try b.appendSlice("-S");
-            return b;
+            return;
         },
         .comparative_adverb => {
             try b.appendSlice("ADV-C");
-            try append_flag(p, &b);
-            return b;
+            try append_flag(p, b);
+            return;
         },
         .comparative_noun => {
             try b.append('N');
-            try append_cng(p, &b);
+            try append_cng(p, b);
             try b.appendSlice("-C");
-            return b;
+            return;
         },
         .comparative_adjective => {
             try b.append('A');
-            try append_cng(p, &b);
+            try append_cng(p, b);
             try b.appendSlice("-C");
-            return b;
+            return;
         },
         else => {},
     }
 
-    return b;
+    return;
 }
 
 inline fn append_person(p: parsing.Parsing, b: *std.ArrayList(u8)) !void {
@@ -407,41 +405,43 @@ const expectEqualStrings = std.testing.expectEqualStrings;
 //const expectError = std.testing.expectError;
 
 test "simple byz string tests" {
-    const allocator = std.heap.page_allocator;
+    var out = std.ArrayList(u8).init(std.testing.allocator);
+    defer out.deinit();
+
     // Some basic sanity checks.
     {
-        const i = try byz_string(parsing.Parsing{
+        out.clearRetainingCapacity();
+        try string(parsing.Parsing{
             .part_of_speech = .noun,
             .case = .nominative,
             .number = .singular,
             .gender = .masculine,
-        }, allocator);
-        defer i.deinit();
-        try expectEqualStrings("N-NSM", i.items);
+        }, &out);
+        try expectEqualStrings("N-NSM", out.items);
     }
 
     {
-        const i = try byz_string(parsing.Parsing{
+        out.clearRetainingCapacity();
+        try string(parsing.Parsing{
             .part_of_speech = .adjective,
             .case = .genitive,
             .number = .plural,
             .gender = .feminine,
-        }, allocator);
-        defer i.deinit();
-        try expectEqualStrings("A-GPF", i.items);
+        }, &out);
+        try expectEqualStrings("A-GPF", out.items);
     }
 
     {
-        const i = try byz_string(parsing.Parsing{
+        out.clearRetainingCapacity();
+        try string(parsing.Parsing{
             .part_of_speech = .verb,
             .tense_form = .present,
             .voice = .active,
             .mood = .indicative,
             .person = .first,
             .number = .plural,
-        }, allocator);
-        defer i.deinit();
-        try expectEqualStrings("V-PAI-1P", i.items);
+        }, &out);
+        try expectEqualStrings("V-PAI-1P", out.items);
     }
 }
 
@@ -449,7 +449,8 @@ const parse = @import("parse.zig").parse;
 const expectError = std.testing.expectError;
 
 test "byz data test" {
-    const allocator = std.heap.page_allocator;
+    var out = std.ArrayList(u8).init(std.testing.allocator);
+    defer out.deinit();
 
     //const byz_data = "N-GSF\nT-APN";
     const byz_data = @embedFile("data/byz-parsing.txt");
@@ -473,14 +474,15 @@ test "byz data test" {
                 _ = try parse(item);
                 return;
             };
-            const y = try byz_string(x, allocator);
-            defer y.deinit();
-            try expectEqualStrings(item, y.items);
+            out.clearRetainingCapacity();
+            try string(x, &out);
+            try expectEqualStrings(item, out.items);
         }
 
         {
             // Test entry when it has brackets
-            var item2 = std.ArrayList(u8).init(allocator);
+            var item2 = std.ArrayList(u8).init(std.testing.allocator);
+            defer item2.deinit();
             try item2.append(' ');
             try item2.append('[');
             try item2.appendSlice(item);
@@ -490,14 +492,15 @@ test "byz data test" {
                 _ = try parse(item2.items);
                 return;
             };
-            const y = try byz_string(x, allocator);
-            defer y.deinit();
-            try expectEqualStrings(item, y.items);
+            out.clearRetainingCapacity();
+            try string(x, &out);
+            try expectEqualStrings(item, out.items);
         }
 
         {
             // Test entry when it has brackets
-            var item2 = std.ArrayList(u8).init(allocator);
+            var item2 = std.ArrayList(u8).init(std.testing.allocator);
+            defer item2.deinit();
             try item2.appendSlice(item);
             try item2.append('K');
             try expectError(error.InvalidParsing, parse(item2.items));
@@ -523,8 +526,8 @@ test "byz data test" {
             std.debug.print("Failed: {s} {any}\n", .{ item, e });
             return;
         };
-        const y = try byz_string(x, allocator);
-        defer y.deinit();
-        try expectEqualStrings(item, y.items);
+        out.clearRetainingCapacity();
+        try string(x, &out);
+        try expectEqualStrings(item, out.items);
     }
 }
