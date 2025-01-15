@@ -17,10 +17,16 @@ const byz = @import("byz.zig");
 //}
 
 test "basic library functionality" {
-    const in = "A-DSN";
-    const out = try parse(in);
-    try testing.expectEqual(9449476, @as(u32, @bitCast(out)));
-    const s = try byz.byz_string(out, std.testing.allocator);
-    defer s.deinit();
-    try std.testing.expectEqualStrings(in, s.items);
+
+    // Convert code to u32 value
+    const code = "A-DSN";
+    var out = std.ArrayList(u8).init(std.testing.allocator);
+    defer out.deinit();
+    const in = try parse(code);
+
+    // Convert u32 back to string
+    try byz.string(in, &out);
+    try std.testing.expectEqualStrings(code, out.items);
+
+    try testing.expectEqual(9449476, @as(u32, @bitCast(in)));
 }
