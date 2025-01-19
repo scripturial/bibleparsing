@@ -30,3 +30,6 @@ test "basic library functionality" {
 
     try testing.expectEqual(9449476, @as(u32, @bitCast(in)));
 }
+test {
+    std.testing.refAllDecls(@This());
+}

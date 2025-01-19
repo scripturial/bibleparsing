@@ -1,3 +1,5 @@
+const PartOfSpeech = @import("part_of_speech.zig").PartOfSpeech;
+
 /// Packs parsing information about a biblical
 /// greek word into a u32.
 pub const Parsing = packed struct(u32) {
@@ -16,39 +18,6 @@ pub const Parsing = packed struct(u32) {
     indeclinable: bool = false,
     crasis: bool = false,
     unused: bool = false,
-};
-
-pub const PartOfSpeech = enum(u5) {
-    unknown = 0,
-    particle = 1,
-    verb = 2,
-    noun = 3,
-    adjective = 4,
-    adverb = 5,
-    conjunction = 6,
-    proper_noun = 7,
-    preposition = 8,
-    conditional = 9,
-    article = 10,
-    interjection = 11,
-    pronoun = 12,
-    personal_pronoun = 13,
-    possessive_pronoun = 14,
-    relative_pronoun = 15,
-    demonstrative_pronoun = 16,
-    reciprocal_pronoun = 17,
-    reflexive_pronoun = 18,
-    transliteration = 19,
-    hebrew_transliteration = 20,
-    aramaic_transliteration = 21,
-    letter = 22,
-    numeral = 23,
-    superlative_adjective = 24,
-    superlative_adverb = 25,
-    superlative_noun = 26,
-    comparative_adjective = 27,
-    comparative_adverb = 28,
-    comparative_noun = 29,
 };
 
 pub const TenseForm = enum(u4) {

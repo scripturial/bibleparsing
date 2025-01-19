@@ -26,3 +26,7 @@ pub fn main() !void {
         std.debug.print("example: main N-MSN\n", .{});
     }
 }
+
+test {
+    std.testing.refAllDecls(@This());
+}
