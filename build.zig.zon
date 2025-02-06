@@ -4,7 +4,7 @@
     // as the key in the `dependencies` table.
     .name = "bibleparsing",
 
-    .version = "0.9.0",
+    .version = "0.10.0",
     //.minimum_zig_version = "0.11.0",
 
     // This field is optional.

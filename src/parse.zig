@@ -530,7 +530,6 @@ pub fn parse_cng(t: *Tokenizer) !void {
             return error.Incomplete;
         },
         else => {
-            std.debug.print("unknown number\n", .{});
             return error.InvalidParsing;
         },
     }
@@ -550,7 +549,6 @@ pub fn parse_cng(t: *Tokenizer) !void {
             return error.Incomplete;
         },
         else => {
-            std.debug.print("unknown gender\n", .{});
             return error.InvalidParsing;
         },
     }
@@ -558,7 +556,6 @@ pub fn parse_cng(t: *Tokenizer) !void {
     try parse_flag(t);
 
     if (!is_breaking(t.next())) {
-        std.debug.print("unexpected parsing terminator\n", .{});
         return error.InvalidParsing;
     }
 }
