@@ -657,7 +657,7 @@ const Tokenizer = struct {
     }
 
     inline fn skip(self: *Tokenizer) void {
-        while (self.index <= self.limit) {
+        while (self.index < self.limit) {
             const c = self.data[self.index];
             if (is_breaking(c)) {
                 // Increment over valid/plausible leading characters
@@ -691,6 +691,22 @@ test "token reader" {
     try expectEqual('b', t.next());
     t.skip();
     try expectEqual('c', t.next());
+}
+
+test "empty token reader" {
+    const data = "";
+    var t: Tokenizer = .{
+        .data = data,
+        .index = 0,
+        .limit = data.len,
+        .parsing = .{},
+    };
+    t.skip();
+    try expectEqual(0, t.peek());
+    try expectEqual(0, t.next());
+    try expectEqual(0, t.peek());
+    t.skip();
+    try expectEqual(0, t.next());
 }
 
 test "simple parsing tests" {
