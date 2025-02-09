@@ -562,7 +562,9 @@ pub fn parse_cng(t: *Tokenizer) !void {
             t.parsing.gender = .neuter;
         },
         0 => {
-            return error.Incomplete;
+            if (t.parsing.part_of_speech != .noun) {
+                return error.Incomplete;
+            }
         },
         else => {
             return error.InvalidParsing;
