@@ -122,6 +122,19 @@ pub fn parse_data(t: *Tokenizer) !Parsing {
         }
     }
 
+    // Two letter pos
+    if (c == 'P' and p == 'N') {
+        _ = t.next(); // Consume the N
+        const x = t.peek();
+        if (x == '-' or x == 0) {
+            _ = t.next(); // Consume the -
+            t.parsing.part_of_speech = .proper_noun;
+            try parse_cng(t);
+            return t.parsing;
+        }
+        return error.InvalidParsing;
+    }
+
     // Three letter pos
     const d = t.next();
     const e = t.next();
@@ -720,6 +733,12 @@ test "simple parsing tests" {
         .number = .singular,
         .gender = .masculine,
     }, try parse("N-NSM"));
+    try expectEqual(Parsing{
+        .part_of_speech = .proper_noun,
+        .case = .accusative,
+        .number = .singular,
+        .gender = .masculine,
+    }, try parse("PN-ASM"));
     try expectEqual(Parsing{
         .part_of_speech = .article,
         .case = .genitive,
