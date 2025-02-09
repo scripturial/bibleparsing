@@ -7,6 +7,9 @@ pub const Error = error{ InvalidParsing, Incomplete };
 /// a u32 by reading from a u8 string, or return an
 /// error if it is inavlid.
 pub fn parse(data: []const u8) !Parsing {
+    if (data.len == 0) {
+        return Error.Incomplete;
+    }
     var t: Tokenizer = .{
         .data = data,
         .index = 0,
