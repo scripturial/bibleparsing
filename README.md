@@ -1,7 +1,8 @@
 # Bible Parsing
 
 This library converts a bible parsing/tagging code into a compressed
-u32 value, and allows writing a u32 value back to a string.
+u32 value, and allows writing a u32 value back to a string. Tested
+using the parsing codes found in the Byzantine Text data files.
 
 ```zig
 // Convert code 'A-DSN' to u32 value.
